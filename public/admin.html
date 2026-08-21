@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-mode="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#060813" />
+  <link rel="icon" href="/app-icon.png" />
+  <title>لوحة تحكم الاستبيان — Neon Edition</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/theme.js"></script>
+</head>
+<body class="page-admin">
+  <!-- ===== تسجيل الدخول مع زر إظهار/إخفاء كلمة المرور ===== -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card card">
+      <div class="brand-icon" id="loginBrandIcon">⚡</div>
+      <h1 id="loginTitle">لوحة تحكم الاستبيان</h1>
+      <p class="subtitle">أدخل كلمة المرور للمتابعة</p>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <div class="password-wrapper">
+          <input type="password" id="passwordInput" placeholder="••••••••" />
+          <button type="button" id="togglePasswordBtn" class="toggle-password-btn" title="إظهار / إخفاء كلمة المرور">👁️</button>
+        </div>
+      </div>
+      <p class="login-error" id="loginError" style="display:none"></p>
+      <button class="btn btn-block btn-lg" id="loginBtn">دخول لوحة التحكم ✨</button>
+    </div>
+  </div>
+
+  <!-- ===== الهيكل العام ===== -->
+  <div class="app-shell" id="appShell" style="display:none">
+    <aside class="sidebar">
+      <a class="brand" href="/survey" target="_blank" title="فتح صفحة الاستبيان">
+        <span class="brand-icon" id="sideBrandIcon">⚡</span>
+        <span class="brand-title" id="sideTitle">استبيان رضا العملاء</span>
+      </a>
+      <nav>
+        <button class="nav-item active" data-tab="survey">
+          <span class="nav-icon">📊</span><span>النتائج والتحليلات</span>
+        </button>
+        <button class="nav-item" data-tab="criteria">
+          <span class="nav-icon">📋</span><span>بنود وأسئلة التقييم</span>
+        </button>
+        <button class="nav-item" data-tab="settings">
+          <span class="nav-icon">⚙️</span><span>الإعدادات والمظهر</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost btn-block" data-mode-toggle title="تغيير الوضع">☀️ الوضع النهاري / الليلي</button>
+        <button class="btn btn-danger btn-block" id="logoutBtn">تسجيل الخروج</button>
+      </div>
+    </aside>
+
+    <main class="main">
+            <!-- ===== لوحة النتائج والتحليلات المتقدمة ===== -->
+      <section id="view-survey" class="view active">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+          <div>
+            <h1>لوحة نتائج وتحليلات الاستبيان 📊</h1>
+            <div class="subtitle" id="surveyWelcome">متابعة لحظية ومفصلة لآراء العملاء ومؤشرات الرضا العام</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" id="exportCsvBtn">تصدير إكسيل (Excel / CSV) 📥</button>
+            <button class="btn btn-ghost btn-sm" onclick="window.print()">طباعة التقرير 🖨️</button>
+          </div>
+        </div>
+
+        <!-- بطاقة QR والربط المباشر -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-title"><span><span class="title-icon">🔗</span>رمز الاستبيان المباشر (QR Code)</span></div>
+          <div class="qr-box">
+            <img id="surveyQrImg" alt="رمز الاستبيان" />
+            <div class="qr-link" id="surveyQrTarget"></div>
+            <div class="field" style="width:100%">
+              <label>رابط الاستبيان العام (المشفر في رمز QR)</label>
+              <div style="display:flex;gap:10px">
+                <input type="text" id="surveyUrlInput" placeholder="https://..." style="flex:1" />
+                <button class="btn" id="saveSurveyUrlBtn">حفظ الرابط</button>
+              </div>
+              <p class="qr-hint">اتركه فارغاً ليتم استخدام رابط الخادم تلقائياً</p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+              <a class="btn btn-secondary btn-sm" id="surveyQrDownload" download="survey-qr.png">تحميل رمز QR 📥</a>
+              <a class="btn btn-sm" id="surveyOpenBtn" target="_blank">فتح صفحة الاستبيان ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- بطاقات المؤشرات العامة (KPIs) والشارتات -->
+        <div class="dashboard-kpi-row" id="dashboardKpiRow">
+          <!-- KPI Cards Rendered Dynamically -->
+        </div>
+
+        <!-- الشارت والنسبة العامة لتوزيع التقييمات -->
+        <div class="dashboard-charts-grid">
+          <!-- الدائرة / العداد العام لنسبة الرضا -->
+          <div class="card chart-card">
+            <div class="card-title"><span><span class="title-icon">🎯</span>مؤشر الرضا العام الكلي</span></div>
+            <div class="gauge-container" id="overallGaugeContainer">
+              <!-- Rendered Dynamically -->
+            </div>
+          </div>
+
+          <!-- شريط النسب المئوية الكلية (راضي / محايد / سيئ) -->
+          <div class="card chart-card">
+            <div class="card-title"><span><span class="title-icon">📈</span>التوزيع النسبي لجميع التقييمات</span></div>
+            <div class="breakdown-bars-container" id="overallBreakdownContainer">
+              <!-- Rendered Dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- تحليل تفصيلي لكل بند من بنود التقييم -->
+        <div class="card">
+          <div class="card-title">
+            <span><span class="title-icon">📋</span>تحليل تفصيلي لنسب كل بند من بنود التقييم</span>
+            <span style="font-size:0.85em;color:var(--color-text-muted)">مبني على كافة تقييمات العملاء</span>
+          </div>
+          <div class="question-stats-grid" id="surveyQuestionStats"></div>
+        </div>
+
+        <!-- سجل التقييمات مع شريط الفلاتر المتقدم -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">
+            <span><span class="title-icon">💬</span>سجل ومراجعة تقييمات العملاء الواردة</span>
+            <span class="badge badge-primary" id="surveyResultsCountBadge">0 تقييم</span>
+          </div>
+
+          <!-- شريط الفلاتر الذكي والمتطور -->
+          <div class="advanced-filters-panel">
+            <!-- الفلاتر السريعة بالأزرار -->
+            <div class="filter-pills-row">
+              <span class="filter-label">تصفية سريعة:</span>
+              <button class="filter-pill active" data-filter-sat="all">الكل (All)</button>
+              <button class="filter-pill pill-good" data-filter-sat="good">الراضين فقط 😊</button>
+              <button class="filter-pill pill-neutral" data-filter-sat="neutral">المحايدين 😐</button>
+              <button class="filter-pill pill-bad" data-filter-sat="bad">غير الراضين 😞</button>
+              <button class="filter-pill pill-notes" data-filter-sat="notes">مع ملاحظات فقط 💬</button>
+            </div>
+
+            <!-- فلاتر التاريخ والبحث -->
+            <div class="filters-input-grid">
+              <div class="field" style="flex:2;min-width:200px">
+                <label>بحث بالاسم أو رقم الموبايل أو الملاحظات</label>
+                <input type="text" id="surveySearchInput" placeholder="اكتب للبحث الفوري..." />
+              </div>
+              <div class="field" style="flex:1;min-width:140px">
+                <label>من تاريخ</label>
+                <input type="date" id="surveyFromInput" />
+              </div>
+              <div class="field" style="flex:1;min-width:140px">
+                <label>إلى تاريخ</label>
+                <input type="date" id="surveyToInput" />
+              </div>
+              <div class="field" style="align-self:flex-end">
+                <button class="btn btn-ghost btn-sm" id="surveyFilterClearBtn">إعادة تعيين ✕</button>
+              </div>
+            </div>
+
+            <!-- أزرار فترات التاريخ السريعة -->
+            <div class="date-quick-pills">
+              <span class="filter-label">فترة محددة:</span>
+              <button class="date-pill active" data-quick-date="all">كل الأوقات</button>
+              <button class="date-pill" data-quick-date="today">اليوم 📅</button>
+              <button class="date-pill" data-quick-date="week">آخر 7 أيام</button>
+              <button class="date-pill" data-quick-date="month">آخر 30 يوماً</button>
+            </div>
+          </div>
+
+          <!-- قائمة التقييمات المقسمة والمنظمة -->
+          <div class="survey-responses-feed" id="surveyResponsesList"></div>
+        </div>
+      </section>
+
+      <!-- ===== بنود وأسئلة التقييم (جديد وديناميكي) ===== -->
+      <section id="view-criteria" class="view">
+        <div class="page-header">
+          <div>
+            <h1>إدارة بنود وأسئلة التقييم 📋</h1>
+            <div class="subtitle">إضافة وتعديل وحذف بنود ومعايير الاستبيان التي تظهر للعملاء</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span><span class="title-icon">➕</span>إضافة بند تقييم جديد</span></div>
+          <div class="form-row">
+            <div class="field">
+              <label>اسم البند بالعربية (مثال: سرعة الخدمة)</label>
+              <input type="text" id="newCriteriaAr" placeholder="اكتب اسم البند بالعربية..." />
+            </div>
+            <div class="field">
+              <label>اسم البند بالإنجليزية (مثال: Speed of Service)</label>
+              <input type="text" id="newCriteriaEn" placeholder="Write in English..." />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>أيقونة البند (إيموجي)</label>
+              <input type="text" id="newCriteriaIcon" placeholder="مثال: ⏱️ أو 🍕 أو ☕" style="max-width:160px" />
+            </div>
+            <div class="field" style="align-self:flex-end">
+              <button class="btn btn-success" id="addCriteriaBtn">إضافة البند للقائمة ✨</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span><span class="title-icon">📋</span>بنود التقييم الحالية</span></div>
+          <div id="criteriaList" class="criteria-list"></div>
+          <div class="form-row" style="margin-top:16px">
+            <button class="btn" id="saveCriteriaBtn">حفظ تغييرات البنود 💾</button>
+            <button class="btn btn-ghost" id="resetCriteriaBtn">استعادة البنود الافتراضية</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== الإعدادات ===== -->
+      <section id="view-settings" class="view">
+        <div class="page-header">
+          <div>
+            <h1>إعدادات وتخصيص المظهر ⚙️</h1>
+            <div class="subtitle">التحكم في عنوان الاستبيان، نظام الألوان النيون، واللوجوهات</div>
+          </div>
+        </div>
+
+        
+        <div class="card">
+          <div class="card-title"><span><span class="title-icon">💬</span>ربط وتكامل إشعارات Slack</span></div>
+          <p style="font-size:0.92em;color:var(--color-text-muted);margin-bottom:16px">
+            احصل على إشعار وتفاصيل فورية في قناة Slack الخاصة بك بمجرد إرسال أي عميل لتقييم جديد!
+          </p>
+          <div class="form-row">
+            <div class="field" style="flex:2">
+              <label>رابط الـ Slack Webhook URL</label>
+              <input type="url" id="slackWebhookInput" placeholder="https://hooks.slack.com/services/..." />
+            </div>
+            <div class="field" style="flex:1">
+              <label>حالة الإشعارات</label>
+              <select id="slackEnabledSelect">
+                <option value="true">مفعلة (Enabled) ✅</option>
+                <option value="false">معطلة (Disabled) ❌</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:10px">
+            <button class="btn btn-secondary" id="saveSlackBtn">حفظ إعدادات Slack 💾</button>
+            <button class="btn btn-ghost" id="testSlackBtn">إرسال إشعار تجريبي 🔔</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span><span class="title-icon">🏷️</span>عنوان الاستبيان</span></div>
+          <div class="form-row">
+            <div class="field" style="flex:1">
+              <label>العنوان الرئيسي</label>
+              <input type="text" id="projectTitleInput" placeholder="عنوان الاستبيان" />
+            </div>
+          </div>
+          <div class="form-row">
+            <button class="btn" id="saveTitleBtn">حفظ العنوان</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span><span class="title-icon">🎨</span>تخصيص لوحة الألوان النيون</span></div>
+          <div id="themeFields" class="form-row"></div>
+          <div class="form-row" style="margin-top:14px">
+            <button class="btn" id="saveThemeBtn">حفظ التغييرات</button>
+            <button class="btn btn-ghost" id="resetThemeBtn">استعادة الافتراضي النيون</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span><span class="title-icon">🌐</span>اللغة والوضع الافتراضي</span></div>
+          <div class="form-row">
+            <div class="field" style="flex:1">
+              <label>اللغة الافتراضية</label>
+              <select id="langSelect">
+                <option value="ar">العربية (Arabic)</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="field" style="flex:1">
+              <label>الوضع الافتراضي للمظهر</label>
+              <select id="modeSelect">
+                <option value="dark">الوضع الليلي النيون (Dark Neon)</option>
+                <option value="light">الوضع الفاتح العصري (Light Modern)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <button class="btn" id="saveLangModeBtn">حفظ الإعدادات</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span><span class="title-icon">📝</span>تخصيص نصوص الاستبيان</span></div>
+          <div class="content-lang-tabs">
+            <button type="button" class="active" data-clang="ar">🇸🇦 العربية</button>
+            <button type="button" data-clang="en">🇺🇸 English</button>
+          </div>
+          <div id="contentFields" class="form-grid"></div>
+          <div class="form-row" style="margin-top:16px">
+            <button class="btn" id="saveContentBtn">حفظ النصوص</button>
+            <button class="btn btn-ghost" id="resetContentBtn">استعادة النصوص الافتراضية</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span><span class="title-icon">🖼️</span>إدارة اللوجوهات والصور</span></div>
+          <div id="logoManager"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html lang=ar dir=rtl data-mode=dark>
+<head>
+  <meta charset=UTF-8 />
+  <meta name=viewport content=width=device-width, initial-scale=1, viewport-fit=cover />
+  <meta name=theme-color content=#060813 />
+  <meta name=description content=استبيان رضا العملاء بتصميم نيون عصري />
+  <link rel=icon href=/app-icon.png />
+  <link rel=apple-touch-icon href=/app-icon.png />
+  <title>استبيان رضا العملاء</title>
+  <link rel=stylesheet href=css/style.css />
+  <script src=js/theme.js></script>
+</head>
+<body class=page-survey>
+  <div class=bg-logo id=bgLogo></div>
+
+  <div class=survey-tools>
+    <button class=tool-btn id=langBtn data-lang-toggle title=تغيير اللغة>EN</button>
+    <button class=tool-btn data-mode-toggle title=تغيير الوضع>☀️</button>
+  </div>
+
+  <main class=survey-shell>
+    <div class=survey-hero card>
+      <div class=survey-brand-icon id=surveyBrandIcon>⭐</div>
+      <h1 id=surveyTitle>ما رأيك في زيارتك لنا؟</h1>
+      <p class=survey-subtitle id=surveySubtitle>تقييمك يساعدنا على التحسّن — شكراً لوقتك!</p>
+    </div>
+
+    <form id=surveyForm novalidate>
+      <div id=surveyQuestions></div>
+
+      <div class=card>
+        <div class=survey-field>
+          <label class=survey-notes-label for=surveyName id=surveyNameLabel>اسم العميل</label>
+          <input type=text id=surveyName placeholder=اكتب اسمك هنا... autocomplete=name required />
+        </div>
+        <div class=survey-field>
+          <label class=survey-notes-label for=surveyMobile id=surveyMobileLabel>رقم الموبايل</label>
+          <input type=tel id=surveyMobile placeholder=مثال: 01012345678 autocomplete=tel inputmode=tel required />
+        </div>
+      </div>
+
+      <div class=card>
+        <label class=survey-notes-label for=surveyNotes id=surveyNotesLabel>ملاحظاتك لنا</label>
+        <textarea id=surveyNotes rows=4 placeholder=اكتب أي ملاحظة أو اقتراح...></textarea>
+      </div>
+
+      <button type=submit class=btn btn-success btn-block btn-lg id=surveySubmitBtn>إرسال التقييم ✨</button>
+      <p class=survey-foot id=surveyFoot>جميع التقييمات تصلنا بشكل مباشر</p>
+    </form>
+
+    <div id=surveyDone class=survey-done style=display:none>
+      <div class=survey-done-icon>🎉</div>
+      <h2 id=doneTitle>شكراً لتقييمك!</h2>
+      <p id=doneMessage>ملاحظاتك وصلتنا بنجاح</p>
+      <button type=button class=btn btn-lg id=surveyAgainBtn>تقييم جديد ✨</button>
+    </div>
+  </main>
+
+  <div class=survey-footer id=pageFooter>تقييم رضا العملاء ⚡ Neon Survey</div>
+
+  <script src=js/survey.js></script>
+</body>
+</html>

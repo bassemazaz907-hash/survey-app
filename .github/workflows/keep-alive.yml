@@ -1,0 +1,22 @@
+name: keep-alive
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Ping Render app
+        run: |
+          curl -sf -o /dev/null -w "status=%{http_code} time=%{time_total}s\n" https://survey-app-as9k.onrender.com/api/settings/public || true
